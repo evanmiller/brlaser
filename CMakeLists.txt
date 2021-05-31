@@ -88,8 +88,6 @@ if(NOT CUPS_LIBS)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
-check_symbol_exists(open_memstream "stdio.h" HAVE_OPEN_MEMSTREAM)
-
 cmake_push_check_state()
 set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${CUPS_CFLAGS}")
 check_include_file_cxx(cups/raster.h HAVE_CUPS_RASTER_H)

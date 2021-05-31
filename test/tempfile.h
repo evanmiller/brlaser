@@ -20,26 +20,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/mman.h>
 #include <vector>
 #include "config.h"
 
 class tempfile {
  public:
   explicit tempfile()
-      : ptr_(0),
-        size_(0),
-        file_(
-#ifdef HAVE_OPEN_MEMSTREAM
-                open_memstream(&ptr_, &size_)
-#else
-                tmpfile()
-#endif
-                ) {
+        file_(tmpfile()) {
   }
 
   ~tempfile() {
     fclose(file_);
-    free(ptr_);
   }
 
   FILE *file() {
@@ -49,12 +42,14 @@ class tempfile {
   std::vector<uint8_t> data() {
     if (fflush(file_))
       return std::vector<uint8_t>();
-    return std::vector<uint8_t>(ptr_, ptr_ + size_);
+    size_t temp_size = ftell(file_);
+    void *temp = mmap(NULL, temp_size, PROT_READ, 0, fileno(file_), 0);
+    std::vector<uint8_t> result = std::vector<uint8_t>((char *)temp, (char *)temp + temp_size);
+    munmap(temp, temp_size);
+    return result;
   }
 
  private:
-  char *ptr_;
-  size_t size_;
   FILE *file_;
 };
 
