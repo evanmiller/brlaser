@@ -93,6 +93,7 @@ void dump_page_header(const cups_page_header2_t &h) {
   d(cupsRowCount);
   d(cupsRowFeed);
   d(cupsRowStep);
+#ifndef _BRLASER_CUPS_COMPAT_OLD
   d(cupsNumColors);
   d(cupsBorderlessScalingFactor);
   d(cupsPageSize);
@@ -103,5 +104,6 @@ void dump_page_header(const cups_page_header2_t &h) {
   d(cupsMarkerType);
   d(cupsRenderingIntent);
   d(cupsPageSizeName);
+#endif
 #undef d
 }

@@ -75,8 +75,8 @@ MediaType 7 "ENV-THICK/Thick envelopes"
 MediaType 8 "ENV-THIN/Thin envelopes"
 
 Option "brlaserEconomode/Toner save mode" Boolean AnySetup 10
-  *Choice False/Off "<</cupsInteger10 0>>setpagedevice"
-  Choice True/On "<</cupsInteger10 1>>setpagedevice"
+  *Choice False/Off "<</cupsCompression 0>>setpagedevice"
+  Choice True/On "<</cupsCompression 1>>setpagedevice"
 
 
 {

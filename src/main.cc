@@ -90,25 +90,26 @@ page_params build_page_params(const cups_page_header2_t &header) {
   static const std::array<std::string, 6> sources = {{
     "AUTO", "T1", "T2", "T3", "MP", "MANUAL"
   }};
-  static const std::map<std::string, std::string> sizes = {
-    { "A4", "A4" },
-    { "A5", "A5" },
-    { "A6", "A6" },
-    { "B5", "B5" },
-    { "B6", "B6" },
-    { "EnvC5", "C5" },
-    { "EnvMonarch", "MONARCH" },
-    { "EnvPRC5", "DL" },
-    { "EnvDL", "DL" },
-    { "Executive", "EXECUTIVE" },
-    { "Legal", "LEGAL" },
-    { "Letter", "LETTER" }
+
+  static const std::map<std::tuple<int, int>, std::string> sizes = {
+      { {595, 842}, "A4" },
+      { {420, 595}, "A5" },
+      { {298, 420}, "A6" },
+      { {499, 709}, "B5" },
+      { {354, 499}, "B6" },
+      { {649, 459}, "C5" },
+      { {312, 624}, "DL" },
+      { {279, 540}, "MONARCH" },
+      { {522, 756}, "EXECUTIVE" },
+      { {612, 792}, "LETTER" },
+      { {612, 1008}, "LEGAL" },
   };
 
   page_params p = { };
+  p.papersize = "A4";
   p.num_copies = header.NumCopies;
   p.resolution = header.HWResolution[0];
-  p.economode = header.cupsInteger[10];
+  p.economode = header.cupsCompression;
   p.mediatype = header.MediaType;
   p.duplex = header.Duplex;
 
@@ -117,11 +118,9 @@ page_params build_page_params(const cups_page_header2_t &header) {
   else
     p.sourcetray = sources[0];
 
-  auto size_it = sizes.find(header.cupsPageSizeName);
+  auto size_it = sizes.find(std::make_tuple(header.PageSize[0], header.PageSize[1]));
   if (size_it != sizes.end())
     p.papersize = size_it->second;
-  else
-    p.papersize = "A4";
 
   return p;
 }
@@ -176,7 +175,7 @@ int main(int argc, char *argv[]) {
     while (!interrupted && cupsRasterReadHeader2(ras, &header)) {
       if (header.cupsBitsPerPixel != 1
           || header.cupsBitsPerColor != 1
-          || header.cupsNumColors != 1
+          || header.cupsColorSpace != 3
           || header.cupsBytesPerLine > 10000) {
         fprintf(stderr, "ERROR: " PACKAGE ": Page %d: Bogus raster data.\n", job.pages() + 1);
         dump_page_header(header);
